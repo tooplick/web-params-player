@@ -521,7 +521,7 @@
      * 获取封面URL
      */
     async function getCoverUrl(mid) {
-        const url = `${API_BASE}/api/cover?mid=${encodeURIComponent(mid)}`;
+        const url = `${API_BASE}/api/song/cover?mid=${encodeURIComponent(mid)}`;
         const response = await fetch(url);
 
         if (!response.ok) {
