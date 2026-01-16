@@ -64,15 +64,70 @@
         </div>
     </div>
 
-    <!-- 错误提示 -->
-    <div class="error-container" id="error-container" style="display: none;">
-        <div class="error-card">
-            <i class="fas fa-exclamation-triangle"></i>
-            <h2>参数缺失</h2>
-            <p id="error-message">请提供完整的播放参数</p>
-            <div class="usage-hint">
-                <p>正确格式:</p>
-                <code>?title=歌曲名&artist=歌手&cover=封面URL&audio=音频URL</code>
+    <!-- 文档页面（无参数时显示） -->
+    <div class="doc-container" id="doc-container" style="display: none;">
+        <div class="doc-card">
+            <div class="doc-header">
+                <i class="fas fa-music"></i>
+                <h1>Web Params Player</h1>
+                <p class="doc-subtitle">轻量级网页音乐播放器</p>
+            </div>
+
+            <div class="doc-section">
+                <h2><i class="fas fa-link"></i> 使用方法</h2>
+                <p>通过 URL 参数传入歌曲信息：</p>
+                <code class="doc-url">https://player.ygking.top/?title=歌曲名&artist=歌手&cover=封面URL&audio=音频URL</code>
+            </div>
+
+            <div class="doc-section">
+                <h2><i class="fas fa-list"></i> 参数说明</h2>
+                <table class="doc-table">
+                    <tr>
+                        <th>参数</th>
+                        <th>说明</th>
+                        <th>必填</th>
+                    </tr>
+                    <tr>
+                        <td>title</td>
+                        <td>歌曲名称</td>
+                        <td>✅</td>
+                    </tr>
+                    <tr>
+                        <td>artist</td>
+                        <td>歌手名称</td>
+                        <td>✅</td>
+                    </tr>
+                    <tr>
+                        <td>cover</td>
+                        <td>封面图片 URL</td>
+                        <td>✅</td>
+                    </tr>
+                    <tr>
+                        <td>audio</td>
+                        <td>音频文件 URL</td>
+                        <td>✅</td>
+                    </tr>
+                    <tr>
+                        <td>detail</td>
+                        <td>详情页 URL</td>
+                        <td>⚪</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="doc-section">
+                <h2><i class="fas fa-keyboard"></i> 快捷键</h2>
+                <div class="doc-shortcuts">
+                    <span><kbd>Space</kbd> 播放/暂停</span>
+                    <span><kbd>←</kbd> 后退5秒</span>
+                    <span><kbd>→</kbd> 前进5秒</span>
+                </div>
+            </div>
+
+            <div class="doc-footer">
+                <a href="https://github.com/tooplick/web-params-player" target="_blank">
+                    <i class="fab fa-github"></i> GitHub
+                </a>
             </div>
         </div>
     </div>

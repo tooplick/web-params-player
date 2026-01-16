@@ -11,8 +11,7 @@
     // DOM Elements
     const elements = {
         playerContainer: document.getElementById('player-container'),
-        errorContainer: document.getElementById('error-container'),
-        errorMessage: document.getElementById('error-message'),
+        docContainer: document.getElementById('doc-container'),
 
         // Background
         bgLayer: document.getElementById('bg-layer'),
@@ -98,12 +97,11 @@
     }
 
     /**
-     * 显示错误
+     * 显示文档页面
      */
-    function showError(message) {
+    function showDocs() {
         elements.playerContainer.style.display = 'none';
-        elements.errorContainer.style.display = 'flex';
-        elements.errorMessage.textContent = message;
+        elements.docContainer.style.display = 'flex';
     }
 
     /**
@@ -374,7 +372,7 @@
         const validation = validateParams(params);
 
         if (!validation.valid) {
-            showError(validation.message);
+            showDocs();
             return;
         }
 
