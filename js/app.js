@@ -92,7 +92,10 @@
         const detailUrl = extractFullParam('detail', []);
 
         // 使用代理加载音频（解决防盗链 403 问题）
+        // 已禁用代理，直接使用原始URL测试
         const proxyAudioUrl = (url) => {
+            return url; // 直接返回原始URL，不走代理
+            /*
             if (!url) return url;
             // 检查是否需要代理（外部 URL）
             const isExternal = url.startsWith('http://') || url.startsWith('https://');
@@ -100,6 +103,7 @@
                 return `/proxy?url=${encodeURIComponent(url)}`;
             }
             return url;
+            */
         };
 
         return {
