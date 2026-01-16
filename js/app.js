@@ -251,6 +251,89 @@
 
         // 绑定事件
         bindEvents();
+
+        // 设置 Media Session API（浏览器媒体控制）
+        setupMediaSession(params);
+    }
+
+    /**
+     * 设置 Media Session API
+     * 将歌曲信息传递给浏览器媒体控制中心
+     */
+    function setupMediaSession(params) {
+        if (!('mediaSession' in navigator)) {
+            console.warn('Media Session API 不受支持');
+            return;
+        }
+
+        // 设置媒体元数据
+        navigator.mediaSession.metadata = new MediaMetadata({
+            title: params.title,
+            artist: params.artist,
+            album: params.title, // 使用歌曲名作为专辑名
+            artwork: [
+                { src: params.cover, sizes: '96x96', type: 'image/jpeg' },
+                { src: params.cover, sizes: '128x128', type: 'image/jpeg' },
+                { src: params.cover, sizes: '192x192', type: 'image/jpeg' },
+                { src: params.cover, sizes: '256x256', type: 'image/jpeg' },
+                { src: params.cover, sizes: '384x384', type: 'image/jpeg' },
+                { src: params.cover, sizes: '512x512', type: 'image/jpeg' }
+            ]
+        });
+
+        // 设置播放/暂停控制
+        navigator.mediaSession.setActionHandler('play', () => {
+            elements.audio.play();
+        });
+
+        navigator.mediaSession.setActionHandler('pause', () => {
+            elements.audio.pause();
+        });
+
+        // 设置上一曲/下一曲（单曲播放器，禁用）
+        navigator.mediaSession.setActionHandler('previoustrack', null);
+        navigator.mediaSession.setActionHandler('nexttrack', null);
+
+        // 设置进度跳转
+        navigator.mediaSession.setActionHandler('seekto', (details) => {
+            if (details.seekTime !== undefined && elements.audio.duration) {
+                elements.audio.currentTime = details.seekTime;
+            }
+        });
+
+        // 设置快进/快退
+        navigator.mediaSession.setActionHandler('seekbackward', (details) => {
+            const skipTime = details.seekOffset || 5;
+            elements.audio.currentTime = Math.max(0, elements.audio.currentTime - skipTime);
+        });
+
+        navigator.mediaSession.setActionHandler('seekforward', (details) => {
+            const skipTime = details.seekOffset || 5;
+            elements.audio.currentTime = Math.min(elements.audio.duration || 0, elements.audio.currentTime + skipTime);
+        });
+
+        // 监听播放进度，更新 position state
+        elements.audio.addEventListener('timeupdate', updatePositionState);
+        elements.audio.addEventListener('durationchange', updatePositionState);
+
+        console.log('Media Session API 已设置');
+    }
+
+    /**
+     * 更新媒体播放位置状态
+     */
+    function updatePositionState() {
+        if (!('mediaSession' in navigator) || !elements.audio.duration) return;
+
+        try {
+            navigator.mediaSession.setPositionState({
+                duration: elements.audio.duration,
+                playbackRate: elements.audio.playbackRate,
+                position: elements.audio.currentTime
+            });
+        } catch (e) {
+            // 忽略错误，某些浏览器可能不支持
+        }
     }
 
     /**
