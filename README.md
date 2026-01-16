@@ -11,6 +11,7 @@
 - 🔗 可选的歌曲详情页跳转
 - ⌨️ 键盘快捷键支持
 - 📱 响应式设计
+- 🎛️ 浏览器媒体控制（Media Session API）
 
 ## URL 参数
 
@@ -25,7 +26,7 @@
 ## 使用示例
 
 ```
-https://player.ygking.top/?title=晴天&artist=周杰伦&cover=https%3A%2F%2Fexample.com%2Fcover.jpg&audio=https%3A%2F%2Fexample.com%2Faudio.mp3
+https://player.ygking.top/?title=%E6%99%B4%E5%A4%A9&artist=%E5%91%A8%E6%9D%B0%E4%BC%A6&cover=https://y.gtimg.cn/music/photo_new/T002R500x500M000000MkMni19ClKG.jpg&audio=https://isure.stream.qqmusic.qq.com/F000003Qui1q2u1Zho.flac?guid=79105e1124940063902614cdb140d848&vkey=8437A92727DBC2BA823E45F9A0B1AA92EE77256ADEB1058420BEE3897726F5F976F45AE6F059E848192631E51619E73E02D5D530182D1FFE__v21ebdc53e&uin=896389745&fromtag=119114&redirect=1&detail=https://y.qq.com/n/ryqq/songDetail/0039MnYb0qxYhV
 ```
 
 ## 键盘快捷键
