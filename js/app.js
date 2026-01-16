@@ -71,11 +71,25 @@
             }
         };
 
+        // 获取原始音频 URL
+        const audioUrl = params.get('audio');
+
+        // 使用代理加载音频（解决防盗链 403 问题）
+        const proxyAudioUrl = (url) => {
+            if (!url) return url;
+            // 检查是否需要代理（外部 URL）
+            const isExternal = url.startsWith('http://') || url.startsWith('https://');
+            if (isExternal) {
+                return `/proxy?url=${encodeURIComponent(url)}`;
+            }
+            return url;
+        };
+
         return {
             title: safeDecode(params.get('title')),
             artist: safeDecode(params.get('artist')),
             cover: params.get('cover'),  // URL 不需要额外解码
-            audio: params.get('audio'),  // URL 不需要额外解码
+            audio: proxyAudioUrl(audioUrl),  // 使用代理
             detail: params.get('detail') // URL 不需要额外解码
         };
     }
