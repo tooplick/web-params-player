@@ -45,6 +45,9 @@
     // State
     let isDragging = false;
 
+    // API配置
+    const API_BASE = 'https://api.ygking.top';
+
     /**
      * 解析 URL 参数（带解码处理）
      */
@@ -475,9 +478,130 @@
     }
 
     /**
+     * 搜索歌曲
+     */
+    async function searchSong(name) {
+        const url = `${API_BASE}/api/search?keyword=${encodeURIComponent(name)}&type=song&num=1`;
+        const response = await fetch(url);
+
+        if (!response.ok) {
+            throw new Error(`搜索失败: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        if (data.code !== 0 || !data.data?.list?.length) {
+            throw new Error('未找到歌曲');
+        }
+
+        return data.data.list[0];
+    }
+
+    /**
+     * 获取歌曲播放URL
+     */
+    async function getSongUrl(mid) {
+        const url = `${API_BASE}/api/song/url?mid=${encodeURIComponent(mid)}`;
+        const response = await fetch(url);
+
+        if (!response.ok) {
+            throw new Error(`获取播放URL失败: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        if (data.code !== 0 || !data.data?.url) {
+            throw new Error('无法获取播放URL');
+        }
+
+        return data.data.url;
+    }
+
+    /**
+     * 获取封面URL
+     */
+    async function getCoverUrl(mid) {
+        const url = `${API_BASE}/api/cover?mid=${encodeURIComponent(mid)}`;
+        const response = await fetch(url);
+
+        if (!response.ok) {
+            throw new Error(`获取封面失败: ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        if (data.code !== 0 || !data.data?.url) {
+            throw new Error('无法获取封面URL');
+        }
+
+        return data.data.url;
+    }
+
+    /**
+     * 通过歌曲名搜索并跳转到播放器
+     */
+    async function searchAndRedirect(name) {
+        try {
+            // 显示加载状态
+            elements.songTitle.textContent = '搜索中...';
+            elements.songArtist.textContent = name;
+            elements.playerContainer.style.display = 'flex';
+            elements.docContainer.style.display = 'none';
+
+            // 1. 搜索歌曲
+            const song = await searchSong(name);
+            const mid = song.mid;
+            const title = song.name || song.title || name;
+
+            // 获取歌手名（处理多个歌手的情况）
+            let artist = '未知歌手';
+            if (song.singer && Array.isArray(song.singer) && song.singer.length > 0) {
+                artist = song.singer.map(s => s.name).join(' / ');
+            } else if (song.singer_name) {
+                artist = song.singer_name;
+            }
+
+            // 更新显示
+            elements.songTitle.textContent = title;
+            elements.songArtist.textContent = artist;
+
+            // 2. 并行获取封面和音频URL
+            const [coverUrl, audioUrl] = await Promise.all([
+                getCoverUrl(mid),
+                getSongUrl(mid)
+            ]);
+
+            // 3. 构建完整的播放器URL并跳转
+            const playerUrl = new URL(window.location.origin + window.location.pathname);
+            playerUrl.searchParams.set('title', title);
+            playerUrl.searchParams.set('artist', artist);
+            playerUrl.searchParams.set('cover', coverUrl);
+            playerUrl.searchParams.set('audio', audioUrl);
+
+            // 使用 replace 跳转，避免返回时再次触发搜索
+            window.location.replace(playerUrl.toString());
+
+        } catch (error) {
+            console.error('搜索处理失败:', error);
+            elements.songTitle.textContent = '搜索失败';
+            elements.songArtist.textContent = error.message;
+        }
+    }
+
+    /**
      * 初始化
      */
     function init() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const nameParam = urlParams.get('name');
+
+        // 如果有 name 参数，执行搜索并跳转
+        if (nameParam) {
+            searchAndRedirect(nameParam);
+            return;
+        }
+
+        // 正常流程：解析完整参数
         const params = getParams();
         const validation = validateParams(params);
 
