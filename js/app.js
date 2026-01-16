@@ -510,11 +510,17 @@
 
         const data = await response.json();
 
-        if (data.code !== 0 || !data.data?.url) {
+        if (data.code !== 0 || !data.data) {
             throw new Error('无法获取播放URL');
         }
 
-        return data.data.url;
+        // API 返回格式: { data: { "歌曲mid": "播放url" } }
+        const audioUrl = data.data[mid] || Object.values(data.data)[0];
+        if (!audioUrl) {
+            throw new Error('无法获取播放URL');
+        }
+
+        return audioUrl;
     }
 
     /**
