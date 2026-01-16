@@ -50,6 +50,7 @@
      */
     function getParams() {
         const params = new URLSearchParams(window.location.search);
+        const rawSearch = window.location.search;
 
         // 安全解码函数，处理可能的双重编码
         const safeDecode = (value) => {
@@ -71,8 +72,24 @@
             }
         };
 
-        // 获取原始音频 URL
-        const audioUrl = params.get('audio');
+        // 从原始 URL 中提取完整的参数值（处理包含 & 的 URL）
+        const extractFullParam = (paramName, nextParams = []) => {
+            const regex = new RegExp(`[?&]${paramName}=([^]*?)(?:&(?:${nextParams.join('|')})=|$)`);
+            const match = rawSearch.match(regex);
+            if (match && match[1]) {
+                try {
+                    return decodeURIComponent(match[1]);
+                } catch {
+                    return match[1];
+                }
+            }
+            return params.get(paramName);
+        };
+
+        // audio 参数后面可能跟着 detail 参数
+        const audioUrl = extractFullParam('audio', ['detail']);
+        // detail 是最后一个参数
+        const detailUrl = extractFullParam('detail', []);
 
         // 使用代理加载音频（解决防盗链 403 问题）
         const proxyAudioUrl = (url) => {
@@ -88,9 +105,9 @@
         return {
             title: safeDecode(params.get('title')),
             artist: safeDecode(params.get('artist')),
-            cover: params.get('cover'),  // URL 不需要额外解码
-            audio: proxyAudioUrl(audioUrl),  // 使用代理
-            detail: params.get('detail') // URL 不需要额外解码
+            cover: params.get('cover'),
+            audio: proxyAudioUrl(audioUrl),
+            detail: detailUrl
         };
     }
 
