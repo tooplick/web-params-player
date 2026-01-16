@@ -177,45 +177,37 @@
         elements.songTitle.textContent = params.title;
         elements.songArtist.textContent = params.artist;
 
-        // 设置封面（先尝试跨域获取以提取颜色）
-        let corsAttempted = false;
-
-        const loadCover = (useCors) => {
-            if (useCors) {
-                elements.coverImg.crossOrigin = 'anonymous';
-            } else {
-                elements.coverImg.removeAttribute('crossOrigin');
-            }
-            elements.coverImg.src = params.cover;
-        };
-
         elements.coverImg.onload = () => {
             elements.coverImg.classList.add('loaded');
             // 设置背景
             elements.bgLayer.style.backgroundImage = `url(${params.cover})`;
 
-            // 尝试提取颜色（可能因 CORS 失败）
-            if (elements.coverImg.crossOrigin) {
-                const color = extractDominantColor(elements.coverImg);
+            // 创建一个隐藏的图片用于提取颜色（使用 CORS 代理）
+            const proxyImg = new Image();
+            proxyImg.crossOrigin = 'anonymous';
+            // 使用 wsrv.nl 作为图片代理，它支持 CORS
+            proxyImg.src = `https://wsrv.nl/?url=${encodeURIComponent(params.cover)}&output=jpg`;
+
+            proxyImg.onload = () => {
+                const color = extractDominantColor(proxyImg);
                 if (color) {
                     applyThemeColor(color);
                 }
-            }
+            };
+
+            proxyImg.onerror = () => {
+                console.warn('颜色提取失败: 代理图片加载失败');
+            };
         };
 
         elements.coverImg.onerror = () => {
-            // 如果跨域加载失败，尝试不带 crossOrigin 重新加载
-            if (elements.coverImg.crossOrigin && !corsAttempted) {
-                corsAttempted = true;
-                console.warn('跨域加载失败，重新加载（无颜色提取）');
-                loadCover(false);
-            } else {
-                console.warn('封面加载失败');
-            }
+            console.warn('封面加载失败');
+            // 即便封面加载失败，也可以尝试用默认颜色或之前的逻辑，这里暂不处理
         };
 
-        // 开始加载（优先尝试跨域）
-        loadCover(true);
+        // 直接加载原图到显示元素（不需要 crossOrigin，避免 CORS 错误导致图片不显示）
+        elements.coverImg.removeAttribute('crossOrigin');
+        elements.coverImg.src = params.cover;
 
         // 设置音频
         elements.audio.src = params.audio;
