@@ -47,16 +47,37 @@
     let isDragging = false;
 
     /**
-     * 解析 URL 参数
+     * 解析 URL 参数（带解码处理）
      */
     function getParams() {
         const params = new URLSearchParams(window.location.search);
+
+        // 安全解码函数，处理可能的双重编码
+        const safeDecode = (value) => {
+            if (!value) return value;
+            try {
+                // 尝试解码，如果已经是解码后的则直接返回
+                const decoded = decodeURIComponent(value);
+                // 检查是否还需要再解码一次（双重编码的情况）
+                if (decoded !== value && decoded.includes('%')) {
+                    try {
+                        return decodeURIComponent(decoded);
+                    } catch {
+                        return decoded;
+                    }
+                }
+                return decoded;
+            } catch {
+                return value;
+            }
+        };
+
         return {
-            title: params.get('title'),
-            artist: params.get('artist'),
-            cover: params.get('cover'),
-            audio: params.get('audio'),
-            detail: params.get('detail')
+            title: safeDecode(params.get('title')),
+            artist: safeDecode(params.get('artist')),
+            cover: params.get('cover'),  // URL 不需要额外解码
+            audio: params.get('audio'),  // URL 不需要额外解码
+            detail: params.get('detail') // URL 不需要额外解码
         };
     }
 
@@ -86,6 +107,68 @@
     }
 
     /**
+     * 从图片提取主色调
+     */
+    function extractDominantColor(img) {
+        try {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            const size = 50; // 缩小尺寸提高性能
+            canvas.width = size;
+            canvas.height = size;
+
+            ctx.drawImage(img, 0, 0, size, size);
+            const imageData = ctx.getImageData(0, 0, size, size);
+            const data = imageData.data;
+
+            // 收集颜色样本
+            let r = 0, g = 0, b = 0, count = 0;
+
+            for (let i = 0; i < data.length; i += 16) { // 每4个像素采样一次
+                const pr = data[i];
+                const pg = data[i + 1];
+                const pb = data[i + 2];
+
+                // 跳过太暗或太亮的颜色
+                const brightness = (pr + pg + pb) / 3;
+                if (brightness < 30 || brightness > 220) continue;
+
+                // 跳过灰色（饱和度太低）
+                const max = Math.max(pr, pg, pb);
+                const min = Math.min(pr, pg, pb);
+                const saturation = max > 0 ? (max - min) / max : 0;
+                if (saturation < 0.2) continue;
+
+                r += pr;
+                g += pg;
+                b += pb;
+                count++;
+            }
+
+            if (count > 0) {
+                r = Math.round(r / count);
+                g = Math.round(g / count);
+                b = Math.round(b / count);
+                return `rgb(${r}, ${g}, ${b})`;
+            }
+        } catch (e) {
+            console.warn('颜色提取失败:', e);
+        }
+        return null;
+    }
+
+    /**
+     * 应用主题色
+     */
+    function applyThemeColor(color) {
+        if (!color) return;
+        document.documentElement.style.setProperty('--accent', color);
+        // 计算hover颜色（稍微亮一点）
+        elements.playBtn.style.background = color;
+        elements.playBtn.style.boxShadow = `0 8px 25px ${color}66`;
+    }
+
+    /**
      * 初始化播放器
      */
     function initPlayer(params) {
@@ -96,16 +179,45 @@
         elements.songTitle.textContent = params.title;
         elements.songArtist.textContent = params.artist;
 
-        // 设置封面
-        elements.coverImg.src = params.cover;
+        // 设置封面（先尝试跨域获取以提取颜色）
+        let corsAttempted = false;
+
+        const loadCover = (useCors) => {
+            if (useCors) {
+                elements.coverImg.crossOrigin = 'anonymous';
+            } else {
+                elements.coverImg.removeAttribute('crossOrigin');
+            }
+            elements.coverImg.src = params.cover;
+        };
+
         elements.coverImg.onload = () => {
             elements.coverImg.classList.add('loaded');
             // 设置背景
             elements.bgLayer.style.backgroundImage = `url(${params.cover})`;
+
+            // 尝试提取颜色（可能因 CORS 失败）
+            if (elements.coverImg.crossOrigin) {
+                const color = extractDominantColor(elements.coverImg);
+                if (color) {
+                    applyThemeColor(color);
+                }
+            }
         };
+
         elements.coverImg.onerror = () => {
-            console.warn('封面加载失败');
+            // 如果跨域加载失败，尝试不带 crossOrigin 重新加载
+            if (elements.coverImg.crossOrigin && !corsAttempted) {
+                corsAttempted = true;
+                console.warn('跨域加载失败，重新加载（无颜色提取）');
+                loadCover(false);
+            } else {
+                console.warn('封面加载失败');
+            }
         };
+
+        // 开始加载（优先尝试跨域）
+        loadCover(true);
 
         // 设置音频
         elements.audio.src = params.audio;
