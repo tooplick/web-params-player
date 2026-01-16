@@ -26,8 +26,8 @@ body {
     background: var(--bg-dark);
     color: var(--text-primary);
     display: flex;
-    align-items: center;
-    justify-content: center;
+    flex-direction: column;
+    justify-content: flex-start;
     min-height: 100vh;
     overflow-y: auto;
 }
@@ -65,6 +65,7 @@ body {
 .player-container {
     width: 100%;
     max-width: 360px;
+    margin: auto;
     padding: 32px 24px;
     display: flex;
     flex-direction: column;
@@ -243,14 +244,10 @@ body {
 
 /* ===== Documentation Container ===== */
 .doc-container {
-    position: fixed;
-    top: 0;
-    left: 0;
     width: 100%;
-    height: 100%;
+    min-height: 100vh;
     display: flex;
-    align-items: center;
-    justify-content: center;
+    flex-direction: column;
     padding: 40px 20px;
     background: var(--bg-dark);
     overflow-y: auto;
@@ -259,6 +256,7 @@ body {
 .doc-card {
     max-width: 480px;
     width: 100%;
+    margin: auto;
     padding: 0;
     background: transparent;
 }
