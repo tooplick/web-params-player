@@ -516,7 +516,7 @@
      * 获取歌曲播放URL
      */
     async function getSongUrl(mid) {
-        const url = `${API_BASE}/api/song/url?mid=${encodeURIComponent(mid)}&quality=flac`;
+        const url = `${API_BASE}/api/song/url?mid=${encodeURIComponent(mid)}`;
         const response = await fetch(url);
 
         if (!response.ok) {
