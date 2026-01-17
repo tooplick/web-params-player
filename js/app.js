@@ -437,9 +437,13 @@
         elements.audio.addEventListener('loadedmetadata', () => {
             elements.totalTime.textContent = formatTime(elements.audio.duration);
         });
+        // 单曲循环：歌曲结束后自动重新播放
         elements.audio.addEventListener('ended', () => {
             elements.audio.currentTime = 0;
-            updatePlayButton();
+            elements.audio.play().catch(err => {
+                console.warn('自动重播失败:', err);
+                updatePlayButton();
+            });
         });
 
         // 进度条点击
@@ -599,7 +603,9 @@
             playerUrl.searchParams.set('cover', coverUrl);
             playerUrl.searchParams.set('audio', audioUrl);
 
-            // 使用 replace 跳转，避免返回时再次触发搜索
+            // 先添加一个历史记录指向首页，这样返回时会回到首页
+            history.pushState({ from: 'home' }, '', 'https://player.ygking.top/');
+            // 再跳转到播放页
             window.location.replace(playerUrl.toString());
 
         } catch (error) {
