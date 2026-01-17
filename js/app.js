@@ -635,13 +635,10 @@
             playerUrl.searchParams.set('cover', coverUrl);
             playerUrl.searchParams.set('audio', audioUrl);
 
-            // 在新标签页中打开播放器
-            window.open(playerUrl.toString(), '_blank');
-
-            // 恢复主页显示状态
-            elements.playerContainer.style.display = 'none';
-            elements.docContainer.style.display = 'flex';
-            elements.nameInput.value = '';
+            // 先添加一个历史记录指向首页，这样返回时会回到首页
+            history.pushState({ from: 'home' }, '', 'https://player.ygking.top/');
+            // 再跳转到播放页
+            window.location.replace(playerUrl.toString());
 
         } catch (error) {
             console.error('搜索处理失败:', error);
