@@ -608,7 +608,7 @@
             // 1. 搜索歌曲
             const song = await searchSong(name);
             const mid = song.mid;
-            const title = song.name || song.title || name;
+            const title = song.title || name;
 
             // 获取歌手名（处理多个歌手的情况）
             let artist = '未知歌手';
