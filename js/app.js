@@ -209,6 +209,36 @@
     }
 
     /**
+     * 动态更新 Favicon 颜色
+     */
+    function updateFavicon(color) {
+        // 将 rgb 颜色转换为 hex
+        let hexColor = color;
+        if (color.startsWith('rgb')) {
+            const match = color.match(/\d+/g);
+            if (match && match.length >= 3) {
+                const r = parseInt(match[0]).toString(16).padStart(2, '0');
+                const g = parseInt(match[1]).toString(16).padStart(2, '0');
+                const b = parseInt(match[2]).toString(16).padStart(2, '0');
+                hexColor = `#${r}${g}${b}`;
+            }
+        }
+
+        // 创建新的 SVG favicon
+        const svg = `<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><path fill='${hexColor}' d='M499.1 6.3c8.1 6 12.9 15.6 12.9 25.7v72V368c0 44.2-43 80-96 80s-96-35.8-96-80s43-80 96-80c11.2 0 22 1.6 32 4.6V147L192 223.8V432c0 44.2-43 80-96 80s-96-35.8-96-80s43-80 96-80c11.2 0 22 1.6 32 4.6V200 128c0-14.1 9.3-26.6 22.8-30.7l320-96c9.7-2.9 20.2-1.1 28.3 5z'/></svg>`;
+
+        // 更新或创建 favicon link 元素
+        let link = document.querySelector("link[rel='icon']");
+        if (!link) {
+            link = document.createElement('link');
+            link.rel = 'icon';
+            link.type = 'image/svg+xml';
+            document.head.appendChild(link);
+        }
+        link.href = 'data:image/svg+xml,' + encodeURIComponent(svg);
+    }
+
+    /**
      * 应用主题色
      */
     function applyThemeColor(color) {
@@ -217,6 +247,8 @@
         // 计算hover颜色（稍微亮一点）
         elements.playBtn.style.background = color;
         elements.playBtn.style.boxShadow = `0 8px 25px ${color}66`;
+        // 更新 favicon 颜色
+        updateFavicon(color);
     }
 
     /**
