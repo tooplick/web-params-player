@@ -42,8 +42,7 @@
         audio: document.getElementById('audio-player'),
 
         // Search (New)
-        nameInput: document.getElementById('name-input'),
-        jumpBtn: document.getElementById('jump-btn')
+        nameInput: document.getElementById('name-input')
     };
 
     // State
@@ -146,18 +145,13 @@
         elements.docContainer.style.display = 'flex';
 
         // 绑定搜索事件
-        if (elements.jumpBtn && elements.nameInput) {
-            const handleSearch = () => {
-                const name = elements.nameInput.value.trim();
-                if (name) {
-                    searchAndRedirect(name);
-                }
-            };
-
-            elements.jumpBtn.onclick = handleSearch;
+        if (elements.nameInput) {
             elements.nameInput.onkeydown = (e) => {
                 if (e.key === 'Enter') {
-                    handleSearch();
+                    const name = elements.nameInput.value.trim();
+                    if (name) {
+                        searchAndRedirect(name);
+                    }
                 }
             };
         }
